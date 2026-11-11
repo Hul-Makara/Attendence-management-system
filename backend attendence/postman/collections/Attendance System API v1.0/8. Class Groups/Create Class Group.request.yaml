@@ -1,0 +1,15 @@
+$kind: http-request
+url: "{{baseUrl}}/class-groups"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "groupName": "Class 11A",
+      "description": "Grade 11 Science"
+    }
+auth:
+  type: noauth
+order: 2000

@@ -1,0 +1,4 @@
+$kind: http-request
+url: "{{baseUrl}}/students/blacklisted"
+method: GET
+order: 2000

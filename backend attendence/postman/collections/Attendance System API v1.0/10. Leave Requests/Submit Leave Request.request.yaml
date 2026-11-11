@@ -1,0 +1,15 @@
+$kind: http-request
+url: "{{baseUrl}}/leave-requests"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "student": "{{studentId}}",
+      "fromDate": "2026-11-12",
+      "toDate": "2026-11-14",
+      "reason": "Family event"
+    }
+order: 3000

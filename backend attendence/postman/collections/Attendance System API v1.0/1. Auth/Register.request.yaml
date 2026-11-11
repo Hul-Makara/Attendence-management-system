@@ -1,0 +1,17 @@
+$kind: http-request
+url: "{{baseUrl}}/auth/register"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "username": "new_user",
+      "password": "securepassword",
+      "email": "new@school.com",
+      "roleId": "{{roleId}}"
+    }
+auth:
+  type: noauth
+order: 5000

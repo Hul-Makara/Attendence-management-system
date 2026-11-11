@@ -1,0 +1,17 @@
+$kind: http-request
+url: "{{baseUrl}}/attendance"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "student": "{{studentId}}",
+      "subject": "{{subjectId}}",
+      "date": "2026-11-11",
+      "checkInTime": "2026-11-11T08:05:00.000Z",
+      "status": "present",
+      "note": "On time"
+    }
+order: 7000

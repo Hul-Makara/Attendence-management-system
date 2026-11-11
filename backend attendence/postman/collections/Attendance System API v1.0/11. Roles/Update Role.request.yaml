@@ -1,0 +1,12 @@
+$kind: http-request
+url: "{{baseUrl}}/roles/{{roleId}}"
+method: PUT
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "roleDescription": "Updated description"
+    }
+order: 5000

@@ -1,0 +1,6 @@
+$kind: http-request
+url: "{{baseUrl}}/class-groups/{{classGroupId}}"
+method: DELETE
+auth:
+  type: noauth
+order: 4000

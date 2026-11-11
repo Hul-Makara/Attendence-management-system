@@ -1,0 +1,20 @@
+$kind: http-request
+url: "{{baseUrl}}/students"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "user": "USER_ID",
+      "firstName": "Sophea",
+      "lastName": "Chan",
+      "dob": "2005-03-15",
+      "gender": "female",
+      "phone": "+85512345678",
+      "classGroup": "{{classGroupId}}"
+    }
+auth:
+  type: noauth
+order: 5000

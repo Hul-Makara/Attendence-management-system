@@ -1,0 +1,4 @@
+$kind: http-request
+url: "{{baseUrl}}/parents/{{parentId}}/children/{{studentId}}"
+method: DELETE
+order: 6000

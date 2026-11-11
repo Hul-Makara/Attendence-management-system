@@ -1,0 +1,4 @@
+$kind: http-request
+url: "{{baseUrl}}/leave-requests/summary/{{studentId}}"
+method: GET
+order: 2000

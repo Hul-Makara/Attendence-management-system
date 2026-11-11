@@ -1,0 +1,15 @@
+$kind: http-request
+url: "{{baseUrl}}/teachers"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "user": "USER_ID",
+      "subject": "{{subjectId}}",
+      "name": "Mr. Dara",
+      "phone": "+85598765432"
+    }
+order: 4000

@@ -1,0 +1,6 @@
+$kind: http-request
+url: "{{baseUrl}}/students/restore/{{studentId}}"
+method: PUT
+auth:
+  type: noauth
+order: 8000

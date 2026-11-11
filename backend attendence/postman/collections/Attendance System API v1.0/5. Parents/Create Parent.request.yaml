@@ -1,0 +1,14 @@
+$kind: http-request
+url: "{{baseUrl}}/parents"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "user": "USER_ID",
+      "parentName": "Mrs. Bopha",
+      "phone": "+85512000000"
+    }
+order: 4000

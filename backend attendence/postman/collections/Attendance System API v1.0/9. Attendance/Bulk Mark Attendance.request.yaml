@@ -1,0 +1,16 @@
+$kind: http-request
+url: "{{baseUrl}}/attendance/bulk"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "subjectId": "{{subjectId}}",
+      "date": "2026-11-11",
+      "records": [
+        { "student": "{{studentId}}", "status": "present" }
+      ]
+    }
+order: 8000

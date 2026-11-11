@@ -1,0 +1,24 @@
+$kind: http-request
+url: "{{baseUrl}}/auth/login"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "username": "student_sophea",
+      "password": "Password123!"
+    }
+auth:
+  type: noauth
+scripts:
+  - type: afterResponse
+    code: |-
+      const res = pm.response.json();
+      if (res.success && res.data) {
+        pm.collectionVariables.set('token', res.data.tokens);
+        if (res.data.user.studentId) pm.collectionVariables.set('studentId', res.data.user.studentId);
+      }
+    language: text/javascript
+order: 3000

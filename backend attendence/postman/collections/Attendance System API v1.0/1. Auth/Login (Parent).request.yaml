@@ -1,0 +1,24 @@
+$kind: http-request
+url: "{{baseUrl}}/auth/login"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "username": "parent_bopha",
+      "password": "Password123!"
+    }
+auth:
+  type: noauth
+scripts:
+  - type: afterResponse
+    code: |-
+      const res = pm.response.json();
+      if (res.success && res.data) {
+        pm.collectionVariables.set('token', res.data.tokens);
+        if (res.data.user.parentId) pm.collectionVariables.set('parentId', res.data.user.parentId);
+      }
+    language: text/javascript
+order: 4000

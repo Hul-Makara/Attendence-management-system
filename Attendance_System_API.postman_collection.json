@@ -1,0 +1,584 @@
+{
+  "info": {
+    "name": "Attendance System API v1.0",
+    "_postman_id": "attendance-api-v1",
+    "description": "Complete API collection matching the Attendance Student Management System documentation. Base URL: http://localhost:4000/api",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:4000/api" },
+    { "key": "token", "value": "" },
+    { "key": "studentId", "value": "" },
+    { "key": "teacherId", "value": "" },
+    { "key": "parentId", "value": "" },
+    { "key": "classGroupId", "value": "" },
+    { "key": "subjectId", "value": "" },
+    { "key": "roleId", "value": "" },
+    { "key": "attendanceId", "value": "" },
+    { "key": "leaveId", "value": "" },
+    { "key": "userId", "value": "" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+  },
+  "item": [
+    {
+      "name": "1. Auth",
+      "item": [
+        {
+          "name": "Login (Admin — auto saves token)",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "const res = pm.response.json();",
+                "if (res.success && res.data) {",
+                "  pm.collectionVariables.set('token', res.data.tokens);",
+                "  if (res.data.user.studentId) pm.collectionVariables.set('studentId', res.data.user.studentId);",
+                "  if (res.data.user.teacherId) pm.collectionVariables.set('teacherId', res.data.user.teacherId);",
+                "  if (res.data.user.parentId) pm.collectionVariables.set('parentId', res.data.user.parentId);",
+                "  pm.collectionVariables.set('userId', res.data.user.id);",
+                "}"
+              ],
+              "type": "text/javascript"
+            }
+          }],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"Password123!\"\n}" },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth","login"] }
+          }
+        },
+        {
+          "name": "Login (Teacher)",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "const res = pm.response.json();",
+                "if (res.success && res.data) {",
+                "  pm.collectionVariables.set('token', res.data.tokens);",
+                "  if (res.data.user.teacherId) pm.collectionVariables.set('teacherId', res.data.user.teacherId);",
+                "}"
+              ],
+              "type": "text/javascript"
+            }
+          }],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"username\": \"teacher_dara\",\n  \"password\": \"Password123!\"\n}" },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth","login"] }
+          }
+        },
+        {
+          "name": "Login (Student)",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "const res = pm.response.json();",
+                "if (res.success && res.data) {",
+                "  pm.collectionVariables.set('token', res.data.tokens);",
+                "  if (res.data.user.studentId) pm.collectionVariables.set('studentId', res.data.user.studentId);",
+                "}"
+              ],
+              "type": "text/javascript"
+            }
+          }],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"username\": \"student_sophea\",\n  \"password\": \"Password123!\"\n}" },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth","login"] }
+          }
+        },
+        {
+          "name": "Login (Parent)",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "const res = pm.response.json();",
+                "if (res.success && res.data) {",
+                "  pm.collectionVariables.set('token', res.data.tokens);",
+                "  if (res.data.user.parentId) pm.collectionVariables.set('parentId', res.data.user.parentId);",
+                "}"
+              ],
+              "type": "text/javascript"
+            }
+          }],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"username\": \"parent_bopha\",\n  \"password\": \"Password123!\"\n}" },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth","login"] }
+          }
+        },
+        {
+          "name": "Register",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"username\": \"new_user\",\n  \"password\": \"securepassword\",\n  \"email\": \"new@school.com\",\n  \"roleId\": \"{{roleId}}\"\n}" },
+            "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth","register"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Users",
+      "item": [
+        {
+          "name": "Get All Users",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/users", "host": ["{{baseUrl}}"], "path": ["users"] } }
+        },
+        {
+          "name": "Get User By ID",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/users/{{userId}}", "host": ["{{baseUrl}}"], "path": ["users","{{userId}}"] } }
+        },
+        {
+          "name": "Create User",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"username\": \"student_001\",\n  \"password\": \"pass123\",\n  \"email\": \"s001@school.com\",\n  \"role\": \"{{roleId}}\"\n}" },
+            "url": { "raw": "{{baseUrl}}/users", "host": ["{{baseUrl}}"], "path": ["users"] }
+          }
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"isActive\": true\n}" },
+            "url": { "raw": "{{baseUrl}}/users/{{userId}}", "host": ["{{baseUrl}}"], "path": ["users","{{userId}}"] }
+          }
+        },
+        {
+          "name": "Toggle Status",
+          "request": { "method": "PATCH", "url": { "raw": "{{baseUrl}}/users/{{userId}}/toggle-status", "host": ["{{baseUrl}}"], "path": ["users","{{userId}}","toggle-status"] } }
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"currentPassword\": \"Password123!\",\n  \"newPassword\": \"NewPassword456!\"\n}" },
+            "url": { "raw": "{{baseUrl}}/users/{{userId}}/change-password", "host": ["{{baseUrl}}"], "path": ["users","{{userId}}","change-password"] }
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"updated@school.com\"\n}" },
+            "url": { "raw": "{{baseUrl}}/users/{{userId}}/profile", "host": ["{{baseUrl}}"], "path": ["users","{{userId}}","profile"] }
+          }
+        },
+        {
+          "name": "Delete User",
+          "request": { "method": "DELETE", "url": { "raw": "{{baseUrl}}/users/{{userId}}", "host": ["{{baseUrl}}"], "path": ["users","{{userId}}"] } }
+        }
+      ]
+    },
+    {
+      "name": "3. Students",
+      "item": [
+        {
+          "name": "Get All Students",
+          "event": [{ "listen": "test", "script": { "exec": ["const res = pm.response.json();","if (res.success && res.data && res.data.length) pm.collectionVariables.set('studentId', res.data[0]._id);"], "type": "text/javascript" } }],
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/students", "host": ["{{baseUrl}}"], "path": ["students"] } }
+        },
+        {
+          "name": "Get Blacklisted Students",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/students/blacklisted", "host": ["{{baseUrl}}"], "path": ["students","blacklisted"] } }
+        },
+        {
+          "name": "Get Student By ID",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/students/{{studentId}}", "host": ["{{baseUrl}}"], "path": ["students","{{studentId}}"] } }
+        },
+        {
+          "name": "Get Student's Parents",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/students/{{studentId}}/parents", "host": ["{{baseUrl}}"], "path": ["students","{{studentId}}","parents"] } }
+        },
+        {
+          "name": "Create Student",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"user\": \"USER_ID\",\n  \"firstName\": \"Sophea\",\n  \"lastName\": \"Chan\",\n  \"dob\": \"2005-03-15\",\n  \"gender\": \"female\",\n  \"phone\": \"+85512345678\",\n  \"classGroup\": \"{{classGroupId}}\"\n}" },
+            "url": { "raw": "{{baseUrl}}/students", "host": ["{{baseUrl}}"], "path": ["students"] }
+          }
+        },
+        {
+          "name": "Update Student",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"phone\": \"+85599999999\"\n}" },
+            "url": { "raw": "{{baseUrl}}/students/{{studentId}}", "host": ["{{baseUrl}}"], "path": ["students","{{studentId}}"] }
+          }
+        },
+        {
+          "name": "Delete Student (soft)",
+          "request": { "method": "DELETE", "url": { "raw": "{{baseUrl}}/students/{{studentId}}", "host": ["{{baseUrl}}"], "path": ["students","{{studentId}}"] } }
+        },
+        {
+          "name": "Restore Student",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "PUT",
+            "url": { "raw": "{{baseUrl}}/students/restore/{{studentId}}", "host": ["{{baseUrl}}"], "path": ["students","restore","{{studentId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Teachers",
+      "item": [
+        {
+          "name": "Get All Teachers",
+          "event": [{ "listen": "test", "script": { "exec": ["const res = pm.response.json();","if (res.success && res.data && res.data.length) pm.collectionVariables.set('teacherId', res.data[0]._id);"], "type": "text/javascript" } }],
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/teachers", "host": ["{{baseUrl}}"], "path": ["teachers"] } }
+        },
+        {
+          "name": "Get Teacher By ID",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/teachers/{{teacherId}}", "host": ["{{baseUrl}}"], "path": ["teachers","{{teacherId}}"] } }
+        },
+        {
+          "name": "Get Teacher's Subjects",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/teachers/{{teacherId}}/subjects", "host": ["{{baseUrl}}"], "path": ["teachers","{{teacherId}}","subjects"] } }
+        },
+        {
+          "name": "Create Teacher",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"user\": \"USER_ID\",\n  \"subject\": \"{{subjectId}}\",\n  \"name\": \"Mr. Dara\",\n  \"phone\": \"+85598765432\"\n}" },
+            "url": { "raw": "{{baseUrl}}/teachers", "host": ["{{baseUrl}}"], "path": ["teachers"] }
+          }
+        },
+        {
+          "name": "Update Teacher",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"phone\": \"+85511111111\"\n}" },
+            "url": { "raw": "{{baseUrl}}/teachers/{{teacherId}}", "host": ["{{baseUrl}}"], "path": ["teachers","{{teacherId}}"] }
+          }
+        },
+        {
+          "name": "Delete Teacher",
+          "request": { "method": "DELETE", "url": { "raw": "{{baseUrl}}/teachers/{{teacherId}}", "host": ["{{baseUrl}}"], "path": ["teachers","{{teacherId}}"] } }
+        }
+      ]
+    },
+    {
+      "name": "5. Parents",
+      "item": [
+        {
+          "name": "Get All Parents",
+          "event": [{ "listen": "test", "script": { "exec": ["const res = pm.response.json();","if (res.success && res.data && res.data.length) pm.collectionVariables.set('parentId', res.data[0]._id);"], "type": "text/javascript" } }],
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/parents", "host": ["{{baseUrl}}"], "path": ["parents"] } }
+        },
+        {
+          "name": "Get Parent By ID",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/parents/{{parentId}}", "host": ["{{baseUrl}}"], "path": ["parents","{{parentId}}"] } }
+        },
+        {
+          "name": "Get Parent's Children",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/parents/{{parentId}}/children", "host": ["{{baseUrl}}"], "path": ["parents","{{parentId}}","children"] } }
+        },
+        {
+          "name": "Create Parent",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"user\": \"USER_ID\",\n  \"parentName\": \"Mrs. Bopha\",\n  \"phone\": \"+85512000000\"\n}" },
+            "url": { "raw": "{{baseUrl}}/parents", "host": ["{{baseUrl}}"], "path": ["parents"] }
+          }
+        },
+        {
+          "name": "Add Child to Parent",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"studentId\": \"{{studentId}}\"\n}" },
+            "url": { "raw": "{{baseUrl}}/parents/{{parentId}}/children", "host": ["{{baseUrl}}"], "path": ["parents","{{parentId}}","children"] }
+          }
+        },
+        {
+          "name": "Remove Child from Parent",
+          "request": { "method": "DELETE", "url": { "raw": "{{baseUrl}}/parents/{{parentId}}/children/{{studentId}}", "host": ["{{baseUrl}}"], "path": ["parents","{{parentId}}","children","{{studentId}}"] } }
+        }
+      ]
+    },
+    {
+      "name": "6. Parent-Student Relations",
+      "item": [
+        {
+          "name": "Get All Relations",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/parent-students", "host": ["{{baseUrl}}"], "path": ["parent-students"] } }
+        },
+        {
+          "name": "Create Relation",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"parentId\": \"{{parentId}}\",\n  \"studentId\": \"{{studentId}}\"\n}" },
+            "url": { "raw": "{{baseUrl}}/parent-students", "host": ["{{baseUrl}}"], "path": ["parent-students"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Subjects",
+      "item": [
+        {
+          "name": "Get All Subjects",
+          "event": [{ "listen": "test", "script": { "exec": ["const res = pm.response.json();","if (res.success && res.data && res.data.length) pm.collectionVariables.set('subjectId', res.data[0]._id);"], "type": "text/javascript" } }],
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/subjects", "host": ["{{baseUrl}}"], "path": ["subjects"] } }
+        },
+        {
+          "name": "Get Subject Schedule",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/subjects/schedule", "host": ["{{baseUrl}}"], "path": ["subjects","schedule"] } }
+        },
+        {
+          "name": "Get Subjects by Teacher",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/subjects/teacher/{{teacherId}}", "host": ["{{baseUrl}}"], "path": ["subjects","teacher","{{teacherId}}"] } }
+        },
+        {
+          "name": "Create Subject",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"subjectName\": \"Physics\",\n  \"subjectCode\": \"PHY101\",\n  \"description\": \"Introduction to physics\",\n  \"teacherId\": \"{{teacherId}}\",\n  \"credit\": 3,\n  \"classGroups\": [\"{{classGroupId}}\"],\n  \"sessions\": [\n    {\n      \"days\": [\"Tuesday\", \"Thursday\"],\n      \"startTime\": \"10:00\",\n      \"endTime\": \"11:30\",\n      \"room\": \"Room B2\"\n    }\n  ]\n}" },
+            "url": { "raw": "{{baseUrl}}/subjects", "host": ["{{baseUrl}}"], "path": ["subjects"] }
+          }
+        },
+        {
+          "name": "Update Subject",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"credit\": 4\n}" },
+            "url": { "raw": "{{baseUrl}}/subjects/{{subjectId}}", "host": ["{{baseUrl}}"], "path": ["subjects","{{subjectId}}"] }
+          }
+        },
+        {
+          "name": "Delete Subject",
+          "request": { "method": "DELETE", "url": { "raw": "{{baseUrl}}/subjects/{{subjectId}}", "host": ["{{baseUrl}}"], "path": ["subjects","{{subjectId}}"] } }
+          }
+      ]
+    },
+    {
+      "name": "8. Class Groups",
+      "item": [
+        {
+          "name": "Get All Class Groups",
+          "event": [{ "listen": "test", "script": { "exec": ["const res = pm.response.json();","if (res.success && res.data && res.data.length) pm.collectionVariables.set('classGroupId', res.data[0]._id);"], "type": "text/javascript" } }],
+          "request": { "auth": { "type": "noauth" }, "method": "GET", "url": { "raw": "{{baseUrl}}/class-groups", "host": ["{{baseUrl}}"], "path": ["class-groups"] } }
+        },
+        {
+          "name": "Create Class Group",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"groupName\": \"Class 11A\",\n  \"description\": \"Grade 11 Science\"\n}" },
+            "url": { "raw": "{{baseUrl}}/class-groups", "host": ["{{baseUrl}}"], "path": ["class-groups"] }
+          }
+        },
+        {
+          "name": "Update Class Group",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"description\": \"Updated description\"\n}" },
+            "url": { "raw": "{{baseUrl}}/class-groups/{{classGroupId}}", "host": ["{{baseUrl}}"], "path": ["class-groups","{{classGroupId}}"] }
+          }
+        },
+        {
+          "name": "Delete Class Group",
+          "request": { "auth": { "type": "noauth" }, "method": "DELETE", "url": { "raw": "{{baseUrl}}/class-groups/{{classGroupId}}", "host": ["{{baseUrl}}"], "path": ["class-groups","{{classGroupId}}"] } }
+        }
+      ]
+    },
+    {
+      "name": "9. Attendance",
+      "item": [
+        {
+          "name": "Get Attendance (filterable)",
+          "event": [{ "listen": "test", "script": { "exec": ["const res = pm.response.json();","if (res.success && res.data && res.data.length) pm.collectionVariables.set('attendanceId', res.data[0]._id);"], "type": "text/javascript" } }],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/attendance",
+              "host": ["{{baseUrl}}"],
+              "path": ["attendance"],
+              "query": [
+                { "key": "studentId", "value": "{{studentId}}", "disabled": true },
+                { "key": "date", "value": "2026-11-11", "disabled": true },
+                { "key": "status", "value": "present", "disabled": true },
+                { "key": "classGroup", "value": "{{classGroupId}}", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Today's Attendance",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/attendance/today", "host": ["{{baseUrl}}"], "path": ["attendance","today"] } }
+        },
+        {
+          "name": "Get Student Stats",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/attendance/stats/{{studentId}}", "host": ["{{baseUrl}}"], "path": ["attendance","stats","{{studentId}}"] } }
+        },
+        {
+          "name": "Get Late Report",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/attendance/late-report", "host": ["{{baseUrl}}"], "path": ["attendance","late-report"] } }
+        },
+        {
+          "name": "Get Absent Report",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/attendance/absent-report", "host": ["{{baseUrl}}"], "path": ["attendance","absent-report"] } }
+        },
+        {
+          "name": "Check Leave Status",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/attendance/check-leave-status?studentId={{studentId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["attendance","check-leave-status"],
+              "query": [{ "key": "studentId", "value": "{{studentId}}" }]
+            }
+          }
+        },
+        {
+          "name": "Mark Single Attendance",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"student\": \"{{studentId}}\",\n  \"subject\": \"{{subjectId}}\",\n  \"date\": \"2026-11-11\",\n  \"checkInTime\": \"2026-11-11T08:05:00.000Z\",\n  \"status\": \"present\",\n  \"note\": \"On time\"\n}" },
+            "url": { "raw": "{{baseUrl}}/attendance", "host": ["{{baseUrl}}"], "path": ["attendance"] }
+          }
+        },
+        {
+          "name": "Bulk Mark Attendance",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"subjectId\": \"{{subjectId}}\",\n  \"date\": \"2026-11-11\",\n  \"records\": [\n    { \"student\": \"{{studentId}}\", \"status\": \"present\" }\n  ]\n}" },
+            "url": { "raw": "{{baseUrl}}/attendance/bulk", "host": ["{{baseUrl}}"], "path": ["attendance","bulk"] }
+          }
+        },
+        {
+          "name": "Mark Absent",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"student\": \"{{studentId}}\",\n  \"subject\": \"{{subjectId}}\",\n  \"date\": \"2026-11-11\"\n}" },
+            "url": { "raw": "{{baseUrl}}/attendance/mark-absent", "host": ["{{baseUrl}}"], "path": ["attendance","mark-absent"] }
+          }
+        },
+        {
+          "name": "Update Attendance",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"late\",\n  \"note\": \"Arrived 10 mins late\"\n}" },
+            "url": { "raw": "{{baseUrl}}/attendance/{{attendanceId}}", "host": ["{{baseUrl}}"], "path": ["attendance","{{attendanceId}}"] }
+          }
+        },
+        {
+          "name": "Delete Attendance",
+          "request": { "method": "DELETE", "url": { "raw": "{{baseUrl}}/attendance/{{attendanceId}}", "host": ["{{baseUrl}}"], "path": ["attendance","{{attendanceId}}"] } }
+        }
+      ]
+    },
+    {
+      "name": "10. Leave Requests",
+      "item": [
+        {
+          "name": "Get All Leave Requests",
+          "event": [{ "listen": "test", "script": { "exec": ["const res = pm.response.json();","if (res.success && res.data && res.data.length) pm.collectionVariables.set('leaveId', res.data[0]._id);"], "type": "text/javascript" } }],
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/leave-requests", "host": ["{{baseUrl}}"], "path": ["leave-requests"] } }
+        },
+        {
+          "name": "Get Student Leave Summary",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/leave-requests/summary/{{studentId}}", "host": ["{{baseUrl}}"], "path": ["leave-requests","summary","{{studentId}}"] } }
+        },
+        {
+          "name": "Submit Leave Request",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"student\": \"{{studentId}}\",\n  \"fromDate\": \"2026-11-12\",\n  \"toDate\": \"2026-11-14\",\n  \"reason\": \"Family event\"\n}" },
+            "url": { "raw": "{{baseUrl}}/leave-requests", "host": ["{{baseUrl}}"], "path": ["leave-requests"] }
+          }
+        },
+        {
+          "name": "Review Leave Request (approve/reject)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"approved\",\n  \"note\": \"Medical evidence reviewed\"\n}" },
+            "url": { "raw": "{{baseUrl}}/leave-requests/{{leaveId}}/review", "host": ["{{baseUrl}}"], "path": ["leave-requests","{{leaveId}}","review"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "11. Roles",
+      "item": [
+        {
+          "name": "Get All Roles",
+          "event": [{ "listen": "test", "script": { "exec": ["const res = pm.response.json();","if (res.success && res.data && res.data.length) pm.collectionVariables.set('roleId', res.data[0]._id);"], "type": "text/javascript" } }],
+          "request": { "auth": { "type": "noauth" }, "method": "GET", "url": { "raw": "{{baseUrl}}/roles", "host": ["{{baseUrl}}"], "path": ["roles"] } }
+        },
+        {
+          "name": "Create Role",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"roleName\": \"Librarian\",\n  \"roleDescription\": \"Library management access\"\n}" },
+            "url": { "raw": "{{baseUrl}}/roles", "host": ["{{baseUrl}}"], "path": ["roles"] }
+          }
+        },
+        {
+          "name": "Get Role By ID",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/roles/{{roleId}}", "host": ["{{baseUrl}}"], "path": ["roles","{{roleId}}"] } }
+        },
+        {
+          "name": "Get Users By Role",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/roles/{{roleId}}/users", "host": ["{{baseUrl}}"], "path": ["roles","{{roleId}}","users"] } }
+        },
+        {
+          "name": "Update Role",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"roleDescription\": \"Updated description\"\n}" },
+            "url": { "raw": "{{baseUrl}}/roles/{{roleId}}", "host": ["{{baseUrl}}"], "path": ["roles","{{roleId}}"] }
+          }
+        },
+        {
+          "name": "Delete Role",
+          "request": { "method": "DELETE", "url": { "raw": "{{baseUrl}}/roles/{{roleId}}", "host": ["{{baseUrl}}"], "path": ["roles","{{roleId}}"] } }
+        }
+      ]
+    }
+  ]
+}

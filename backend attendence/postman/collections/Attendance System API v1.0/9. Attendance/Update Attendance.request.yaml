@@ -1,0 +1,13 @@
+$kind: http-request
+url: "{{baseUrl}}/attendance/{{attendanceId}}"
+method: PUT
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "status": "late",
+      "note": "Arrived 10 mins late"
+    }
+order: 10000

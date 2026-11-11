@@ -1,0 +1,12 @@
+$kind: http-request
+url: "{{baseUrl}}/roles"
+method: GET
+auth:
+  type: noauth
+scripts:
+  - type: afterResponse
+    code: |-
+      const res = pm.response.json();
+      if (res.success && res.data && res.data.length) pm.collectionVariables.set('roleId', res.data[0]._id);
+    language: text/javascript
+order: 1000

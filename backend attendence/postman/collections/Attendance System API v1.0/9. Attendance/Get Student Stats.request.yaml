@@ -1,0 +1,4 @@
+$kind: http-request
+url: "{{baseUrl}}/attendance/stats/{{studentId}}"
+method: GET
+order: 3000

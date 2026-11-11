@@ -1,0 +1,6 @@
+$kind: http-request
+url: "{{baseUrl}}/attendance/check-leave-status?studentId={{studentId}}"
+method: GET
+queryParams:
+  studentId: "{{studentId}}"
+order: 6000

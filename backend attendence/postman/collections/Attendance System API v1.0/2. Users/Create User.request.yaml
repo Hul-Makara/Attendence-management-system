@@ -1,0 +1,17 @@
+$kind: http-request
+url: "{{baseUrl}}/users"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "username": "student_001",
+      "password": "pass123",
+      "email": "s001@school.com",
+      "role": "{{roleId}}"
+    }
+auth:
+  type: noauth
+order: 3000

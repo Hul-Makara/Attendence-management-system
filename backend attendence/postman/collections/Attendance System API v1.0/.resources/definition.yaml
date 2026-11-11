@@ -1,0 +1,20 @@
+$kind: collection
+description: "Complete API collection matching the Attendance Student Management System documentation. Base URL: http://localhost:4000/api"
+variables:
+  baseUrl: http://localhost:4000/api
+  token: ""
+  studentId: ""
+  teacherId: ""
+  parentId: ""
+  classGroupId: ""
+  subjectId: ""
+  roleId: ""
+  attendanceId: ""
+  leaveId: ""
+  userId: ""
+auth:
+  - id: 2e744fdf-9543-4c50-afc8-f0fda7648932
+    type: bearer
+    name: bearer auth
+    credentials:
+      token: "{{token}}"

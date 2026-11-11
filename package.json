@@ -1,0 +1,11 @@
+{
+  "name": "attendance-system",
+  "version": "1.0.0",
+  "description": "Student Attendance Management System",
+  "scripts": {
+    "start:backend": "cd \"backend attendence\" && npm start",
+    "seed:backend": "cd \"backend attendence\" && npm run seed",
+    "start:frontend": "cd frontend && npm start",
+    "build:frontend": "cd frontend && npm run build"
+  }
+}

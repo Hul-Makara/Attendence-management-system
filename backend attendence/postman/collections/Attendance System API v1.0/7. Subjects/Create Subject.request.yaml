@@ -1,0 +1,25 @@
+$kind: http-request
+url: "{{baseUrl}}/subjects"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "subjectName": "Physics",
+      "subjectCode": "PHY101",
+      "description": "Introduction to physics",
+      "teacherId": "{{teacherId}}",
+      "credit": 3,
+      "classGroups": ["{{classGroupId}}"],
+      "sessions": [
+        {
+          "days": ["Tuesday", "Thursday"],
+          "startTime": "10:00",
+          "endTime": "11:30",
+          "room": "Room B2"
+        }
+      ]
+    }
+order: 4000

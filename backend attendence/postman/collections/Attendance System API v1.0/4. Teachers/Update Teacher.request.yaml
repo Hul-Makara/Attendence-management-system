@@ -1,0 +1,12 @@
+$kind: http-request
+url: "{{baseUrl}}/teachers/{{teacherId}}"
+method: PUT
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "phone": "+85511111111"
+    }
+order: 5000

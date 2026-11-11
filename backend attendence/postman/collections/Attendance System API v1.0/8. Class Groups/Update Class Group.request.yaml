@@ -1,0 +1,14 @@
+$kind: http-request
+url: "{{baseUrl}}/class-groups/{{classGroupId}}"
+method: PUT
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "description": "Updated description"
+    }
+auth:
+  type: noauth
+order: 3000

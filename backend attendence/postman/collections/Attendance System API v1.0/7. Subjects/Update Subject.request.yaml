@@ -1,0 +1,12 @@
+$kind: http-request
+url: "{{baseUrl}}/subjects/{{subjectId}}"
+method: PUT
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "credit": 4
+    }
+order: 5000

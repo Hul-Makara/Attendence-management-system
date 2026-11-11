@@ -1,0 +1,14 @@
+$kind: http-request
+name: Review Leave Request (approve/reject)
+url: "{{baseUrl}}/leave-requests/{{leaveId}}/review"
+method: PUT
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "status": "approved",
+      "note": "Medical evidence reviewed"
+    }
+order: 4000

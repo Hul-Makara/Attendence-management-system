@@ -1,0 +1,13 @@
+$kind: http-request
+url: "{{baseUrl}}/parent-students"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "parentId": "{{parentId}}",
+      "studentId": "{{studentId}}"
+    }
+order: 2000

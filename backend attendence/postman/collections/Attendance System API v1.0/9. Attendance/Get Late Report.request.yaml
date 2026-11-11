@@ -1,0 +1,4 @@
+$kind: http-request
+url: "{{baseUrl}}/attendance/late-report"
+method: GET
+order: 4000

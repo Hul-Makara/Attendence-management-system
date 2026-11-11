@@ -1,0 +1,4 @@
+$kind: http-request
+url: "{{baseUrl}}/users/{{userId}}/toggle-status"
+method: PATCH
+order: 5000

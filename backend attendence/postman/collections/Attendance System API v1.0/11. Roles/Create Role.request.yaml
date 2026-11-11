@@ -1,0 +1,15 @@
+$kind: http-request
+url: "{{baseUrl}}/roles"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "roleName": "Librarian",
+      "roleDescription": "Library management access"
+    }
+auth:
+  type: noauth
+order: 2000

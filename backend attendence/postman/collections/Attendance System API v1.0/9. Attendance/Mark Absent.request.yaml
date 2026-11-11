@@ -1,0 +1,14 @@
+$kind: http-request
+url: "{{baseUrl}}/attendance/mark-absent"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "student": "{{studentId}}",
+      "subject": "{{subjectId}}",
+      "date": "2026-11-11"
+    }
+order: 9000
