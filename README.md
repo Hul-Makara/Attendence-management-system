@@ -87,11 +87,5 @@ Open your browser to `http://localhost:4200`.
 
 ---
 
-## 🔑 Demo Credentials
 
-| Role | Username | Password |
-|---|---|---|
-| **Admin** | `admin` | `Password123!` |
-| **Teacher** | `teacher_dara` | `Password123!` |
-| **Student** | `student_sophea` | `Password123!` |
-| **Parent** | `parent_bopha` | `Password123!` |
+
