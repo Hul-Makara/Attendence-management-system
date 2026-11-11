@@ -10,6 +10,7 @@ import { ClassGroup } from '../../core/models/class.model';
 import { Student } from '../../core/models/student.model';
 import { Subject } from '../../core/models/subject.model';
 import { AttendanceRecord, AttendanceStatus } from '../../core/models/attendance.model';
+import { TimetableGridComponent } from './timetable-grid.component';
 
 export interface TimetableSlot {
   day: 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday';
@@ -75,7 +76,7 @@ interface WeekDay {
 @Component({
   selector: 'app-attendance',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TimetableGridComponent],
   template: `
     <div class="attendance-page">
       <!-- Page Header -->
@@ -485,129 +486,33 @@ interface WeekDay {
         </div>
       </div>
 
-      <!-- TIMETABLE GRID VIEW (REPLICA OF PROVIDED SCHEDULE IMAGE) -->
-      <div *ngIf="viewMode() === 'timetable'" class="timetable-view">
-        <div class="card timetable-card">
-          <!-- Timetable Top Bar -->
-          <div class="timetable-top-banner">
-            <div class="banner-left-box">
-              <span class="class-title">{{ getSelectedClassName() }}</span>
+      <!-- TIMETABLE GRID VIEW (ANGULAR DEFERRABLE VIEW) -->
+      @if (viewMode() === 'timetable') {
+        <div class="timetable-view">
+          @defer (when viewMode() === 'timetable') {
+            <app-timetable-grid
+              [className]="getSelectedClassName()"
+              [timetableSchedule]="timetableSchedule"
+              (sessionSelected)="takeAttendanceForSession($event)"
+            />
+          } @placeholder (minimum 300ms) {
+            <div class="card p-5 text-center placeholder-box">
+              <i class="fa-solid fa-table-cells fa-2x text-muted mb-2"></i>
+              <p class="text-muted">Loading timetable schedule...</p>
             </div>
-            <div class="banner-center-box">
-              <span class="semester-date">Schedule Starting: 28/09/2026</span>
+          } @loading (minimum 600ms) {
+            <div class="card p-5 text-center placeholder-box">
+              <i class="fa-solid fa-spinner fa-spin fa-2x text-primary mb-2"></i>
+              <p class="text-muted">Rendering class timetable (Lazy-loading chunk)...</p>
             </div>
-            <div class="banner-right-box">
-              <span class="period-count">P15 • 3 Periods / Day (5:45 PM - 8:45 PM)</span>
+          } @error {
+            <div class="card p-5 text-center text-danger placeholder-box">
+              <i class="fa-solid fa-triangle-exclamation fa-2x mb-2"></i>
+              <p>Failed to load timetable view.</p>
             </div>
-          </div>
-
-          <!-- Schedule Grid -->
-          <div class="table-container timetable-grid-container">
-            <table class="table timetable-table">
-              <thead>
-                <tr>
-                  <th class="time-header-col">TIME / DAY</th>
-                  <th class="day-col">MONDAY</th>
-                  <th class="day-col cyan-col">TUESDAY</th>
-                  <th class="day-col cyan-col">WEDNESDAY</th>
-                  <th class="day-col">THURSDAY</th>
-                  <th class="day-col cyan-col">FRIDAY</th>
-                  <th class="day-col">SATURDAY</th>
-                </tr>
-              </thead>
-              <tbody>
-                <!-- Period 1: 5.45-6.45PM -->
-                <tr>
-                  <td class="time-label-cell">
-                    <strong>5.45 - 6.45 PM</strong>
-                    <div class="period-sub">Period 1</div>
-                  </td>
-                  <td
-                    *ngFor="let slot of getPeriodSlots(1)"
-                    class="timetable-cell"
-                    [class.cyan-cell]="slot.isCyan"
-                    (click)="takeAttendanceForSession(slot)"
-                  >
-                    <div class="cell-time">{{ slot.timeSlot }}</div>
-                    <div class="cell-subject">{{ slot.subjectName }}</div>
-                    <div class="cell-teacher-room">
-                      <span class="teacher-name">{{ slot.teacher }}</span>
-                      <span class="room-pill" [class.room-alert]="slot.isRoomAlert">({{ slot.room }})</span>
-                    </div>
-                    <div class="cell-action-hint">
-                      <i class="fa-solid fa-arrow-right-to-bracket"></i> Take Attendance
-                    </div>
-                  </td>
-                </tr>
-
-                <!-- Period 2: 6.45-7.45PM -->
-                <tr>
-                  <td class="time-label-cell">
-                    <strong>6.45 - 7.45 PM</strong>
-                    <div class="period-sub">Period 2</div>
-                  </td>
-                  <td
-                    *ngFor="let slot of getPeriodSlots(2)"
-                    class="timetable-cell"
-                    [class.cyan-cell]="slot.isCyan"
-                    (click)="takeAttendanceForSession(slot)"
-                  >
-                    <div class="cell-time">{{ slot.timeSlot }}</div>
-                    <div class="cell-subject">{{ slot.subjectName }}</div>
-                    <div class="cell-teacher-room">
-                      <span class="teacher-name">{{ slot.teacher }}</span>
-                      <span class="room-pill" [class.room-alert]="slot.isRoomAlert">({{ slot.room }})</span>
-                    </div>
-                    <div class="cell-action-hint">
-                      <i class="fa-solid fa-arrow-right-to-bracket"></i> Take Attendance
-                    </div>
-                  </td>
-                </tr>
-
-                <!-- Period 3: 7.45-8.45PM -->
-                <tr>
-                  <td class="time-label-cell">
-                    <strong>7.45 - 8.45 PM</strong>
-                    <div class="period-sub">Period 3</div>
-                  </td>
-                  <td
-                    *ngFor="let slot of getPeriodSlots(3)"
-                    class="timetable-cell"
-                    [class.cyan-cell]="slot.isCyan"
-                    (click)="takeAttendanceForSession(slot)"
-                  >
-                    <div class="cell-time">{{ slot.timeSlot }}</div>
-                    <div class="cell-subject">{{ slot.subjectName }}</div>
-                    <div class="cell-teacher-room">
-                      <span class="teacher-name">{{ slot.teacher }}</span>
-                      <span class="room-pill" [class.room-alert]="slot.isRoomAlert">({{ slot.room }})</span>
-                    </div>
-                    <div class="cell-action-hint">
-                      <i class="fa-solid fa-arrow-right-to-bracket"></i> Take Attendance
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <!-- Timetable Footer Legend -->
-          <div class="timetable-legend">
-            <div class="legend-item">
-              <span class="legend-badge cyan-box"></span>
-              <span>Light Blue: Lab / Computer Sessions</span>
-            </div>
-            <div class="legend-item">
-              <span class="legend-badge red-text">2B / 2E / 5D</span>
-              <span>Red Text: Specialized Lab / Building Rooms</span>
-            </div>
-            <div class="legend-item">
-              <i class="fa-solid fa-circle-info text-primary"></i>
-              <span>Click on any session slot above to quickly filter or record attendance!</span>
-            </div>
-          </div>
+          }
         </div>
-      </div>
+      }
     </div>
   `,
   styles: [`

@@ -1,19 +1,24 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, Injector } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { StudentService } from '../../core/services/student.service';
 import { ClassService } from '../../core/services/class.service';
-import { ExcelService, StudentExcelRow } from '../../core/services/excel.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
 import { Student } from '../../core/models/student.model';
 import { ClassGroup } from '../../core/models/class.model';
+import { StudentFormModalComponent } from './student-form-modal.component';
+import { StudentImportModalComponent } from './student-import-modal.component';
 
 @Component({
   selector: 'app-students',
-  
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    StudentFormModalComponent,
+    StudentImportModalComponent,
+  ],
   template: `
     <div class="students-page">
       <!-- Page Header -->
@@ -178,198 +183,42 @@ import { ClassGroup } from '../../core/models/class.model';
         </div>
       </div>
 
-      <!-- Add / Edit Student Modal -->
-      <div class="modal-backdrop" *ngIf="showStudentModal()">
-        <div class="modal-dialog">
-          <div class="modal-header">
-            <h3 class="modal-title">
-              {{ editingStudentId() ? 'Edit Student' : 'Add New Student' }}
-            </h3>
-            <button class="modal-close" (click)="closeStudentModal()">
-              <i class="fa-solid fa-xmark"></i>
-            </button>
-          </div>
-          <form (ngSubmit)="saveStudent()">
-            <div class="modal-body">
-              <div class="form-group">
-                <label class="form-label">English Name *</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  placeholder="e.g. Sok Dara"
-                  [(ngModel)]="studentForm.studentname_en"
-                  name="studentname_en"
-                  required
-                />
-              </div>
-
-              <div class="form-group">
-                <label class="form-label">Khmer Name</label>
-                <input
-                  type="text"
-                  class="form-control khmer-text"
-                  placeholder="e.g. សុខ ដារ៉ា"
-                  [(ngModel)]="studentForm.studentname_kh"
-                  name="studentname_kh"
-                />
-              </div>
-
-              <div class="grid-2">
-                <div class="form-group">
-                  <label class="form-label">Gender *</label>
-                  <select
-                    class="form-select"
-                    [(ngModel)]="studentForm.gender"
-                    name="gender"
-                    required
-                  >
-                    <option value="male">Male (M)</option>
-                    <option value="female">Female (F)</option>
-                    <option value="other">Other</option>
-                  </select>
-                </div>
-
-                <div class="form-group">
-                  <label class="form-label">Class Group *</label>
-                  <select
-                    class="form-select"
-                    [(ngModel)]="studentForm.classGroup"
-                    name="classGroup"
-                    required
-                  >
-                    <option value="">Select Class</option>
-                    <option *ngFor="let cls of classGroups()" [value]="cls._id">
-                      {{ cls.groupName }}
-                    </option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="grid-2">
-                <div class="form-group">
-                  <label class="form-label">Phone Number</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    placeholder="e.g. +855 12 345 678"
-                    [(ngModel)]="studentForm.phone"
-                    name="phone"
-                  />
-                </div>
-
-                <div class="form-group">
-                  <label class="form-label">Date of Birth</label>
-                  <input
-                    type="date"
-                    class="form-control"
-                    [(ngModel)]="studentForm.dob"
-                    name="dob"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" (click)="closeStudentModal()">
-                Cancel
-              </button>
-              <button type="submit" class="btn btn-primary" [disabled]="isSubmitting()">
-                <i *ngIf="isSubmitting()" class="fa-solid fa-spinner fa-spin"></i>
-                Save Student
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-
-      <!-- Excel Import Modal -->
-      <div class="modal-backdrop" *ngIf="showImportModal()">
-        <div class="modal-dialog modal-dialog-lg">
-          <div class="modal-header">
-            <h3 class="modal-title">
-              <i class="fa-solid fa-file-excel" style="color: #16a34a;"></i>
-              Import Students from Excel
-            </h3>
-            <button class="modal-close" (click)="closeImportModal()">
-              <i class="fa-solid fa-xmark"></i>
-            </button>
-          </div>
-
-          <div class="modal-body">
-            <div class="import-help-box">
-              <p>
-                Upload an Excel (<strong>.xlsx</strong>) file with headers:
-                <code>studentname_en</code>, <code>studentname_kh</code>, <code>gender</code>, <code>class</code>.
-              </p>
-              <button class="btn btn-outline btn-sm mt-2" (click)="downloadTemplate()">
-                <i class="fa-solid fa-download"></i> Download Sample Excel Template
-              </button>
-            </div>
-
-            <div class="drop-zone" (click)="fileInput.click()">
-              <input
-                #fileInput
-                type="file"
-                accept=".xlsx, .xls, .csv"
-                (change)="onFileSelected($event)"
-                style="display: none;"
-              />
-              <i class="fa-solid fa-cloud-arrow-up drop-icon"></i>
-              <div class="drop-text">
-                <strong>Click to choose file</strong> or drag and drop
-              </div>
-              <span class="text-muted" style="font-size: 0.8rem;">
-                {{ selectedFile ? selectedFile.name : 'Supported: .xlsx, .xls, .csv' }}
-              </span>
-            </div>
-
-            <!-- Preview Table -->
-            <div *ngIf="importPreviewRows.length > 0" class="mt-3">
-              <div class="preview-header">
-                <strong>Preview ({{ importPreviewRows.length }} rows found):</strong>
-              </div>
-              <div class="table-container mt-1" style="max-height: 240px; overflow-y: auto;">
-                <table class="table">
-                  <thead>
-                    <tr>
-                      <th>studentname_en</th>
-                      <th>studentname_kh</th>
-                      <th>gender</th>
-                      <th>class</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr *ngFor="let row of importPreviewRows.slice(0, 10)">
-                      <td>{{ row.studentname_en || row.name }}</td>
-                      <td class="khmer-text">{{ row.studentname_kh }}</td>
-                      <td>{{ row.gender }}</td>
-                      <td>{{ row.class }}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-              <p *ngIf="importPreviewRows.length > 10" class="text-muted text-center" style="font-size: 0.775rem; margin-top: 0.5rem;">
-                Showing first 10 rows of {{ importPreviewRows.length }}
-              </p>
-            </div>
-          </div>
-
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" (click)="closeImportModal()">
-              Cancel
-            </button>
-            <button
-              type="button"
-              class="btn btn-primary"
-              [disabled]="!selectedFile || isImporting()"
-              (click)="uploadExcel()"
-            >
-              <i *ngIf="isImporting()" class="fa-solid fa-spinner fa-spin"></i>
-              Start Import ({{ importPreviewRows.length }} Students)
-            </button>
+      <!-- Deferrable Student Add/Edit Modal (Angular Deferrable View) -->
+      @defer (when showStudentModal()) {
+        @if (showStudentModal()) {
+          <app-student-form-modal
+            [student]="selectedStudentForEdit"
+            [classGroups]="classGroups()"
+            (closed)="closeStudentModal()"
+            (saved)="onStudentSaved()"
+          />
+        }
+      } @loading (minimum 500ms) {
+        <div class="modal-backdrop">
+          <div class="modal-dialog p-4 text-center">
+            <i class="fa-solid fa-spinner fa-spin fa-2x text-primary mb-2"></i>
+            <p class="text-muted mb-0">Loading student form (lazy-loading module)...</p>
           </div>
         </div>
-      </div>
+      }
+
+      <!-- Deferrable Excel Import Modal (Angular Deferrable View - Lazy Loads XLSX) -->
+      @defer (when showImportModal()) {
+        @if (showImportModal()) {
+          <app-student-import-modal
+            [classGroups]="classGroups()"
+            (closed)="closeImportModal()"
+            (imported)="onImportSuccess()"
+          />
+        }
+      } @loading (minimum 500ms) {
+        <div class="modal-backdrop">
+          <div class="modal-dialog p-4 text-center">
+            <i class="fa-solid fa-spinner fa-spin fa-2x text-primary mb-2"></i>
+            <p class="text-muted mb-0">Loading Excel import module (lazy-loading XLSX)...</p>
+          </div>
+        </div>
+      }
 
       <!-- Excel Export Modal -->
       <div class="modal-backdrop" *ngIf="showExportModal()">
@@ -575,7 +424,7 @@ export class StudentsComponent implements OnInit {
   readonly authService = inject(AuthService);
   private readonly studentService = inject(StudentService);
   private readonly classService = inject(ClassService);
-  private readonly excelService = inject(ExcelService);
+  private readonly injector = inject(Injector);
   private readonly toast = inject(ToastService);
 
   readonly students = signal<Student[]>([]);
@@ -591,6 +440,7 @@ export class StudentsComponent implements OnInit {
   // Modals state
   readonly showStudentModal = signal(false);
   readonly editingStudentId = signal<string | null>(null);
+  selectedStudentForEdit: Student | null = null;
 
   studentForm: {
     studentname_en: string;
@@ -610,8 +460,6 @@ export class StudentsComponent implements OnInit {
 
   // Import State
   readonly showImportModal = signal(false);
-  selectedFile: File | null = null;
-  importPreviewRows: StudentExcelRow[] = [];
 
   // Export State
   readonly showExportModal = signal(false);
@@ -717,76 +565,6 @@ export class StudentsComponent implements OnInit {
     return name.slice(0, 2).toUpperCase();
   }
 
-  // Student CRUD
-  openAddModal() {
-    this.editingStudentId.set(null);
-    this.studentForm = {
-      studentname_en: '',
-      studentname_kh: '',
-      gender: 'male',
-      classGroup: this.classGroups()[0]?._id || '',
-      phone: '',
-      dob: '',
-    };
-    this.showStudentModal.set(true);
-  }
-
-  openEditModal(s: Student) {
-    this.editingStudentId.set(s._id);
-    const cId = typeof s.classGroup === 'object' ? s.classGroup?._id : (s.classGroup || '');
-    this.studentForm = {
-      studentname_en: s.studentname_en || `${s.firstName || ''} ${s.lastName || ''}`.trim(),
-      studentname_kh: s.studentname_kh || '',
-      gender: s.gender === 'F' ? 'female' : (s.gender === 'M' ? 'male' : s.gender || 'male'),
-      classGroup: cId,
-      phone: s.phone || '',
-      dob: s.dob ? s.dob.split('T')[0] : '',
-    };
-    this.showStudentModal.set(true);
-  }
-
-  closeStudentModal() {
-    this.showStudentModal.set(false);
-  }
-
-  saveStudent() {
-    if (!this.studentForm.studentname_en) {
-      this.toast.warning('Please enter the student English name');
-      return;
-    }
-
-    this.isSubmitting.set(true);
-    const id = this.editingStudentId();
-
-    if (id) {
-      this.studentService.updateStudent(id, this.studentForm).subscribe({
-        next: (res) => {
-          this.isSubmitting.set(false);
-          this.toast.success('Student updated successfully');
-          this.closeStudentModal();
-          this.loadData();
-        },
-        error: (err) => {
-          this.isSubmitting.set(false);
-          this.toast.error(err.error?.message || 'Failed to update student');
-        },
-      });
-    } else {
-      this.studentService.createStudent(this.studentForm).subscribe({
-        next: (res) => {
-          this.isSubmitting.set(false);
-          this.toast.success('Student added successfully');
-          this.closeStudentModal();
-          this.loadData();
-        },
-        error: (err) => {
-          this.isSubmitting.set(false);
-          this.toast.error(err.error?.message || 'Failed to create student');
-        },
-      });
-    }
-  }
-
   confirmDelete(s: Student) {
     if (confirm(`Are you sure you want to delete student "${this.getDisplayNameEn(s)}"?`)) {
       this.studentService.deleteStudent(s._id).subscribe({
@@ -801,10 +579,27 @@ export class StudentsComponent implements OnInit {
     }
   }
 
-  // Excel Import
+  // Student CRUD
+  openAddModal() {
+    this.selectedStudentForEdit = null;
+    this.showStudentModal.set(true);
+  }
+
+  openEditModal(s: Student) {
+    this.selectedStudentForEdit = s;
+    this.showStudentModal.set(true);
+  }
+
+  closeStudentModal() {
+    this.showStudentModal.set(false);
+  }
+
+  onStudentSaved() {
+    this.showStudentModal.set(false);
+    this.loadData();
+  }
+
   openImportModal() {
-    this.selectedFile = null;
-    this.importPreviewRows = [];
     this.showImportModal.set(true);
   }
 
@@ -812,40 +607,9 @@ export class StudentsComponent implements OnInit {
     this.showImportModal.set(false);
   }
 
-  async onFileSelected(event: any) {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    this.selectedFile = file;
-    try {
-      const parsed = await this.excelService.parseExcelFile(file);
-      this.importPreviewRows = parsed;
-    } catch {
-      this.toast.error('Unable to parse Excel file. Please check format.');
-    }
-  }
-
-  downloadTemplate() {
-    this.excelService.downloadSampleTemplate();
-    this.toast.info('Sample Excel template downloaded');
-  }
-
-  uploadExcel() {
-    if (!this.selectedFile) return;
-
-    this.isImporting.set(true);
-    this.studentService.importStudents(this.selectedFile).subscribe({
-      next: (res) => {
-        this.isImporting.set(false);
-        this.toast.success(res.message || 'Students imported successfully');
-        this.closeImportModal();
-        this.loadData();
-      },
-      error: (err) => {
-        this.isImporting.set(false);
-        this.toast.error(err.error?.message || 'Failed to import students');
-      },
-    });
+  onImportSuccess() {
+    this.showImportModal.set(false);
+    this.loadData();
   }
 
   // Excel Export
@@ -858,7 +622,7 @@ export class StudentsComponent implements OnInit {
     this.showExportModal.set(false);
   }
 
-  executeExport() {
+  async executeExport() {
     let toExport = this.students();
     if (this.exportClassFilter) {
       toExport = toExport.filter((s) => {
@@ -883,7 +647,9 @@ export class StudentsComponent implements OnInit {
       return row;
     });
 
-    this.excelService.exportToExcel(rows, `students_export_${new Date().toISOString().split('T')[0]}`);
+    const { ExcelService } = await import('../../core/services/excel.service');
+    const excelService = this.injector.get(ExcelService);
+    excelService.exportToExcel(rows, `students_export_${new Date().toISOString().split('T')[0]}`);
     this.toast.success('Excel export file generated successfully');
     this.closeExportModal();
   }

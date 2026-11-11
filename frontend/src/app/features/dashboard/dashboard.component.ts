@@ -1,17 +1,24 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { StudentService } from '../../core/services/student.service';
 import { ClassService } from '../../core/services/class.service';
 import { SubjectService } from '../../core/services/subject.service';
 import { AttendanceService } from '../../core/services/attendance.service';
 import { AttendanceRecord } from '../../core/models/attendance.model';
+import { RecentAttendanceTableComponent } from './recent-attendance-table.component';
+import { DashboardShortcutsComponent } from './dashboard-shortcuts.component';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [
+    CommonModule,
+    RouterModule,
+    RecentAttendanceTableComponent,
+    DashboardShortcutsComponent,
+  ],
   template: `
     <div class="dashboard-container">
       <!-- Welcome Banner -->
@@ -110,123 +117,64 @@ import { AttendanceRecord } from '../../core/models/attendance.model';
         </div>
       </div>
 
-      <!-- Quick Shortcuts & Recent Records -->
+      <!-- Quick Shortcuts & Recent Records (Angular Deferrable Views on Viewport) -->
       <div class="dashboard-row">
-        <!-- Recent Attendance Table -->
-        <div class="card recent-card">
-          <div class="card-header">
-            <h3 class="card-title">Recent Attendance Records</h3>
-            <a routerLink="/attendance" class="btn btn-outline btn-sm">
-              View All <i class="fa-solid fa-arrow-right"></i>
-            </a>
-          </div>
-          <div class="card-body p-0">
-            <div class="table-container" style="border: none;">
-              <table class="table" *ngIf="recentAttendance().length > 0; else noRecent">
-                <thead>
-                  <tr>
-                    <th>Student Name</th>
-                    <th>Class / Group</th>
-                    <th>Date</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let record of recentAttendance()">
-                    <td>
-                      <strong>{{ getStudentName(record.student) }}</strong>
-                    </td>
-                    <td>
-                      <span class="text-muted">{{ getStudentClass(record.student) }}</span>
-                    </td>
-                    <td>{{ record.date | date: 'mediumDate' }}</td>
-                    <td>
-                      <span
-                        class="badge"
-                        [ngClass]="'badge-' + (record.status === 'excused' || record.status === 'on-leave' ? 'excused' : record.status)"
-                      >
-                        {{ formatStatus(record.status) }}
-                      </span>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-              <ng-template #noRecent>
-                <div class="empty-state">
-                  <i class="fa-regular fa-calendar-xmark empty-icon"></i>
-                  <p>No attendance records recorded for today yet.</p>
-                  <a routerLink="/attendance" class="btn btn-primary btn-sm mt-2">
-                    Start Recording Now
-                  </a>
-                </div>
-              </ng-template>
+        <!-- Deferrable Recent Attendance Table (Loaded when scrolled into Viewport) -->
+        <div class="dashboard-col">
+          @defer (on viewport) {
+            <app-recent-attendance-table
+              [records]="recentAttendance()"
+              (viewAll)="goToAttendance()"
+            />
+          } @placeholder (minimum 300ms) {
+            <div class="card recent-card placeholder-card">
+              <div class="card-header">
+                <h3 class="card-title">Recent Attendance Records</h3>
+              </div>
+              <div class="placeholder-body">
+                <i class="fa-solid fa-clock-rotate-left placeholder-icon"></i>
+                <p>Scroll into view to load recent attendance records...</p>
+              </div>
             </div>
-          </div>
+          } @loading (minimum 500ms) {
+            <div class="card recent-card placeholder-card">
+              <div class="placeholder-body">
+                <i class="fa-solid fa-spinner fa-spin text-primary placeholder-icon"></i>
+                <p class="text-muted">Loading attendance data (lazy-loading view)...</p>
+              </div>
+            </div>
+          } @error {
+            <div class="card recent-card placeholder-card">
+              <div class="placeholder-body text-danger">
+                <i class="fa-solid fa-triangle-exclamation placeholder-icon"></i>
+                <p>Failed to load attendance records</p>
+              </div>
+            </div>
+          }
         </div>
 
-        <!-- Quick Links Card -->
-        <div class="card shortcuts-card">
-          <div class="card-header">
-            <h3 class="card-title">System Modules</h3>
-          </div>
-          <div class="card-body">
-            <div class="module-links">
-              <a routerLink="/students" class="module-item">
-                <div class="mod-icon" style="background-color: #eff6ff; color: #2563eb;">
-                  <i class="fa-solid fa-user-graduate"></i>
-                </div>
-                <div class="mod-info">
-                  <span class="mod-title">Student Records</span>
-                  <span class="mod-desc">Search, filter, import & export</span>
-                </div>
-                <i class="fa-solid fa-chevron-right text-muted"></i>
-              </a>
-
-              <a routerLink="/attendance" class="module-item">
-                <div class="mod-icon" style="background-color: #f0fdf4; color: #16a34a;">
-                  <i class="fa-solid fa-clipboard-check"></i>
-                </div>
-                <div class="mod-info">
-                  <span class="mod-title">Attendance Sheet</span>
-                  <span class="mod-desc">Daily & weekly table views</span>
-                </div>
-                <i class="fa-solid fa-chevron-right text-muted"></i>
-              </a>
-
-              <a routerLink="/classes" class="module-item">
-                <div class="mod-icon" style="background-color: #fdf4ff; color: #c026d3;">
-                  <i class="fa-solid fa-chalkboard-user"></i>
-                </div>
-                <div class="mod-info">
-                  <span class="mod-title">Class Management</span>
-                  <span class="mod-desc">Create and organize grade groups</span>
-                </div>
-                <i class="fa-solid fa-chevron-right text-muted"></i>
-              </a>
-
-              <a routerLink="/subjects" class="module-item">
-                <div class="mod-icon" style="background-color: #fff7ed; color: #ea580c;">
-                  <i class="fa-solid fa-book-open"></i>
-                </div>
-                <div class="mod-info">
-                  <span class="mod-title">Subjects & Schedule</span>
-                  <span class="mod-desc">Assign teachers and class times</span>
-                </div>
-                <i class="fa-solid fa-chevron-right text-muted"></i>
-              </a>
-
-              <a *ngIf="authService.isAdmin()" routerLink="/users" class="module-item">
-                <div class="mod-icon" style="background-color: #f1f5f9; color: #475569;">
-                  <i class="fa-solid fa-users-gear"></i>
-                </div>
-                <div class="mod-info">
-                  <span class="mod-title">Users & Permissions</span>
-                  <span class="mod-desc">Admin and teacher accounts</span>
-                </div>
-                <i class="fa-solid fa-chevron-right text-muted"></i>
-              </a>
+        <!-- Deferrable System Modules Shortcuts (Loaded when scrolled into Viewport) -->
+        <div class="dashboard-col">
+          @defer (on viewport) {
+            <app-dashboard-shortcuts [isAdmin]="authService.isAdmin()" />
+          } @placeholder (minimum 300ms) {
+            <div class="card shortcuts-card placeholder-card">
+              <div class="card-header">
+                <h3 class="card-title">System Modules</h3>
+              </div>
+              <div class="placeholder-body">
+                <i class="fa-solid fa-cubes placeholder-icon"></i>
+                <p>Scroll into view to load shortcuts...</p>
+              </div>
             </div>
-          </div>
+          } @loading (minimum 500ms) {
+            <div class="card shortcuts-card placeholder-card">
+              <div class="placeholder-body">
+                <i class="fa-solid fa-spinner fa-spin text-primary placeholder-icon"></i>
+                <p class="text-muted">Loading system modules (lazy-loading view)...</p>
+              </div>
+            </div>
+          }
         </div>
       </div>
     </div>
@@ -248,10 +196,16 @@ import { AttendanceRecord } from '../../core/models/attendance.model';
       gap: 1.5rem;
       flex-wrap: wrap;
     }
-    .welcome-banner h2 { font-size: 1.45rem; font-weight: 700; }
-    .banner-sub { color: #94a3b8; font-size: 0.9rem; margin-top: 0.25rem; }
-    .banner-actions { display: flex; gap: 0.75rem; }
-
+    .banner-sub {
+      color: #94a3b8;
+      margin-top: 0.25rem;
+      font-size: 0.95rem;
+    }
+    .banner-actions {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -259,99 +213,98 @@ import { AttendanceRecord } from '../../core/models/attendance.model';
     }
     .stat-card {
       background: #ffffff;
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      padding: 1.35rem;
+      border-radius: var(--radius-md, 10px);
+      padding: 1.25rem;
       display: flex;
       align-items: center;
-      gap: 1.15rem;
+      gap: 1.25rem;
       box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-color);
     }
     .stat-icon {
       width: 52px;
       height: 52px;
-      border-radius: 12px;
+      border-radius: var(--radius-md, 10px);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.35rem;
+      font-size: 1.45rem;
       flex-shrink: 0;
     }
     .icon-students { background-color: #eff6ff; color: #2563eb; }
     .icon-classes { background-color: #fdf4ff; color: #c026d3; }
     .icon-subjects { background-color: #fff7ed; color: #ea580c; }
     .icon-rate { background-color: #f0fdf4; color: #16a34a; }
-
-    .stat-label { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
+    .stat-content { display: flex; flex-direction: column; }
+    .stat-label { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; text-transform: uppercase; }
     .stat-value { font-size: 1.65rem; font-weight: 700; color: var(--text-main); line-height: 1.2; margin-top: 0.2rem; }
 
     .breakdown-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 1.15rem;
+      gap: 1rem;
     }
     .breakdown-card {
       background: #ffffff;
+      border-radius: var(--radius-sm, 6px);
+      padding: 1rem 1.25rem;
       border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      padding: 1.25rem;
       box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
     }
-    .breakdown-header { display: flex; align-items: center; justify-content: space-between; }
-    .breakdown-count { font-size: 1.85rem; font-weight: 700; margin-top: 0.65rem; color: var(--text-main); }
+    .present-card { border-left: 4px solid var(--success); }
+    .absent-card { border-left: 4px solid var(--danger); }
+    .late-card { border-left: 4px solid var(--warning); }
+    .excused-card { border-left: 4px solid var(--info); }
+    .breakdown-count { font-size: 1.75rem; font-weight: 800; color: var(--text-main); margin: 0.5rem 0 0.15rem; }
     .breakdown-sub { font-size: 0.775rem; color: var(--text-muted); }
 
     .dashboard-row {
       display: grid;
       grid-template-columns: 2fr 1fr;
-      gap: 1.5rem;
+      gap: 1.25rem;
     }
     @media (max-width: 992px) {
       .dashboard-row { grid-template-columns: 1fr; }
     }
-    .p-0 { padding: 0 !important; }
-    .empty-state {
-      text-align: center;
-      padding: 2.5rem 1rem;
-      color: var(--text-muted);
-    }
-    .empty-icon { font-size: 2.5rem; margin-bottom: 0.5rem; opacity: 0.5; }
-    .mt-2 { margin-top: 0.75rem; }
-
-    .module-links {
+    .dashboard-col {
       display: flex;
       flex-direction: column;
-      gap: 0.75rem;
     }
-    .module-item {
+
+    /* Placeholder and loading styles for deferrable views */
+    .placeholder-card {
+      min-height: 280px;
       display: flex;
-      align-items: center;
-      gap: 1rem;
-      padding: 0.85rem;
-      border-radius: var(--radius-sm);
-      border: 1px solid var(--border-color);
-      text-decoration: none;
-      color: var(--text-main);
-      transition: all 0.15s ease-in-out;
+      flex-direction: column;
+      border: 1px dashed #cbd5e1;
+      background: #f8fafc;
     }
-    .module-item:hover {
-      background-color: #f8fafc;
-      border-color: #cbd5e1;
-      transform: translateX(2px);
+    .card-header {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border-color);
     }
-    .mod-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 10px;
+    .card-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin: 0;
+    }
+    .placeholder-body {
+      flex: 1;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      font-size: 1.1rem;
-      flex-shrink: 0;
+      padding: 2.5rem;
+      text-align: center;
+      color: #64748b;
     }
-    .mod-info { flex: 1; }
-    .mod-title { display: block; font-weight: 600; font-size: 0.875rem; }
-    .mod-desc { font-size: 0.75rem; color: var(--text-muted); }
+    .placeholder-icon {
+      font-size: 2.25rem;
+      margin-bottom: 0.75rem;
+      opacity: 0.45;
+    }
   `],
 })
 export class DashboardComponent implements OnInit {
@@ -360,11 +313,12 @@ export class DashboardComponent implements OnInit {
   private readonly classService = inject(ClassService);
   private readonly subjectService = inject(SubjectService);
   private readonly attendanceService = inject(AttendanceService);
+  private readonly router = inject(Router);
 
   readonly totalStudents = signal(0);
   readonly totalClasses = signal(0);
   readonly totalSubjects = signal(0);
-  readonly attendanceRate = signal(100);
+  readonly attendanceRate = signal(0);
 
   readonly todayPresent = signal(0);
   readonly todayAbsent = signal(0);
@@ -427,31 +381,7 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  getStudentName(student: any): string {
-    if (!student) return 'Unknown';
-    if (student.studentname_en) return student.studentname_en;
-    if (student.firstName || student.lastName) {
-      return `${student.firstName || ''} ${student.lastName || ''}`.trim();
-    }
-    return 'Student';
-  }
-
-  getStudentClass(student: any): string {
-    if (!student) return 'N/A';
-    if (student.classGroup && typeof student.classGroup === 'object') {
-      return student.classGroup.groupName;
-    }
-    return 'Class';
-  }
-
-  formatStatus(status: string): string {
-    switch (status) {
-      case 'present': return 'Present';
-      case 'absent': return 'Absent';
-      case 'late': return 'Late';
-      case 'excused':
-      case 'on-leave': return 'Permission';
-      default: return status;
-    }
+  goToAttendance() {
+    this.router.navigate(['/attendance']);
   }
 }
